@@ -20,3 +20,9 @@ You can just `docker-compose up` in the root directory of the project, it will s
 
 ## What could be improved
 Im using bcrypt for hashing passwords, but Im not sure about how secure it is for timing attacks. Backend looks fine as a simple todo app, but it could be improved by adding more features like user roles, user permissions, user profile, user settings, etc. Frontend could be improved by adding more features like drag and drop for attachments, better styling, and more beautiful UI.
+
+## Photos
+
+![Ekran görüntüsü 2024-05-12 202355](https://github.com/ahmtcn123/TaskProject/assets/26122392/158c988b-1ac7-4346-a8dd-8608751a193b)
+
+![Ekran görüntüsü 2024-05-12 202348](https://github.com/ahmtcn123/TaskProject/assets/26122392/407a41e3-fdd6-40f6-845d-025faa5675b1)
