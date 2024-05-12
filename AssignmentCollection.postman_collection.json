@@ -1,0 +1,419 @@
+{
+	"info": {
+		"_postman_id": "eca2571f-0aab-48a2-85a3-f8861d3c1ad9",
+		"name": "AssignmentCollection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "3753708"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Is login succeded and token saved?\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    if (pm.response.code === 200 && jsonData.status) {",
+									"        pm.collectionVariables.set(\"accessToken\", jsonData.data);",
+									"        pm.environment.set(\"accessToken\", jsonData.data);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"ahmetcanco@gmail.com\",\r\n    \"password\": \"1234\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Is login succeded and token saved?\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    if (pm.response.code === 200 && jsonData.status) {\r",
+									"        pm.collectionVariables.set(\"accessToken\", jsonData.data);\r",
+									"        pm.environment.set(\"accessToken\", jsonData.data);\r",
+									"    }\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"ahmetcanco@gmail.com\",\r\n    \"password\": \"1234\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/register",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Todo",
+			"item": [
+				{
+					"name": "New Todo",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Merhaba",
+									"description": "Title of the todo",
+									"type": "text"
+								},
+								{
+									"key": "content",
+									"value": "Bu yapılması gereken bir todo",
+									"description": "Content of the todo",
+									"type": "text"
+								},
+								{
+									"key": "thumbnail",
+									"description": "Thumbnail of the todo",
+									"type": "file",
+									"src": "/C:/Users/ahmet/OneDrive/Pictures/resim2/631241c701a5d.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/todos",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"todos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Todo",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Merhaba Değil",
+									"description": "Title of the todo",
+									"type": "text"
+								},
+								{
+									"key": "content",
+									"value": "Bu yapılması gereken bir todo değil",
+									"description": "Content of the todo",
+									"type": "text"
+								},
+								{
+									"key": "tags",
+									"value": "[\"1\", \"2\", \"3\"]",
+									"type": "text"
+								},
+								{
+									"key": "isDone",
+									"value": "true",
+									"type": "text"
+								},
+								{
+									"key": "thumbnail",
+									"type": "file",
+									"src": [],
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/todos/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"todos",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "8ba26c10-6fbb-4fa7-83d9-02de5d9af8a3",
+									"description": "Todo ID to update"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Attachment to Todo",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "attachment",
+									"type": "file",
+									"src": "/C:/Users/ahmet/OneDrive/Pictures/resim2/south-park-eric-cartman.gif"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/todos/:id/attachment",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"todos",
+								":id",
+								"attachment"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "3ac555cc-e65b-4f09-a42b-18f117288a61",
+									"description": "Todo ID to upload a attachment(s)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Download Attachment of a Todo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/todos/:id/attachment/:attachment",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"todos",
+								":id",
+								"attachment",
+								":attachment"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "3ac555cc-e65b-4f09-a42b-18f117288a61",
+									"description": "Todo ID"
+								},
+								{
+									"key": "attachment",
+									"value": "south-park-eric-cartman.gif",
+									"description": "File name"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Attachment of a Todo",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/todos/:id/attachment/:attachment",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"todos",
+								":id",
+								"attachment",
+								":attachment"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "8ba26c10-6fbb-4fa7-83d9-02de5d9af8a3",
+									"description": "Todo ID"
+								},
+								{
+									"key": "attachment",
+									"value": "south-park-eric-cartman.gif",
+									"description": "File name"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Todo",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/todos/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"todos",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "3ac555cc-e65b-4f09-a42b-18f117288a61",
+									"description": "Todo ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Todos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/todos",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"todos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Todos Thumbnail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/todos/:id/thumbnail",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"todos",
+								":id",
+								"thumbnail"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "3ac555cc-e65b-4f09-a42b-18f117288a61",
+									"description": "Todo ID to get its thumbnail"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{accessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "null"
+		}
+	]
+}
