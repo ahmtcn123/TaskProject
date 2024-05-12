@@ -20,6 +20,15 @@ router.get("/", async (req, res) => {
     const notes = await prisma.todoEntry.findMany({
         where: {
             userId: req.body.userId,
+            ...(
+                req.query.search ? {
+                    OR: [
+                        { title: { contains: req.query.search as string } },
+                        { content: { contains: req.query.search as string } },
+                        { tags: { hasSome: [req.query.search as string] } },
+                    ],
+                } : {}
+            )
         },
     });
     res.json({
@@ -113,8 +122,9 @@ router.post("/:id", async (req, res) => {
         !req.body.title &&
         !req.body.content &&
         !req.body.tags &&
-        !req.body.isDone &&
-        !req.files?.["thumbnail"]
+        req.body.isDone == undefined &&
+        !req.files?.["thumbnail"] &&
+        !req.files?.["attachment"]
     ) {
         return res
             .status(400)
@@ -130,13 +140,12 @@ router.post("/:id", async (req, res) => {
     const content = req.body.content;
     //[1] provided as a string intentionally to trigger "Invalid data types" message
     const tags = req.body.tags ? tryJsonParse(req.body.tags) ? JSON.parse(req.body.tags) : [1] : null;
-    //"null" provided as a string intentionally to trigger "Invalid data types" message
 
     if (
         (title && typeof title !== "string") ||
         (content && typeof content !== "string") ||
         (tags && (!Array.isArray(tags) || Array.isArray(tags) && tags.some((tag: string) => typeof tag !== "string"))) ||
-        (req.body.isDone && req.body.isDone !== "true" && req.body.isDone !== "false")
+        (req.body.isDone != undefined && typeof req.body.isDone != "boolean")
     ) {
         return res
             .status(400)
@@ -188,6 +197,20 @@ router.post("/:id", async (req, res) => {
         await uploadFile(thumbnail, thumbnailPath);
     }
 
+    const attachmentPaths = existingTodo.attachments || [];
+    const attachments = [];
+
+    if (Array.isArray(req.files?.["attachment"])) {
+        attachments.push(...req.files["attachment"]);
+    } else if (req.files?.["attachment"]) {
+        attachments.push(req.files["attachment"]);
+    }
+    for (const attachment of attachments) {
+        const path = `users/${req.body.userId}/todos/${req.params.id}/${attachment.name}`;
+        await uploadFile(attachment, path);
+        attachmentPaths.push(path);
+    }
+
     const note = await prisma.todoEntry.update({
         where: {
             id: req.params.id,
@@ -198,7 +221,8 @@ router.post("/:id", async (req, res) => {
             content: content || existingTodo.content,
             tags: tags || existingTodo.tags,
             thumbnail: thumbnailPath,
-            isDone: req.body.isDone ? req.body.isDone == "true" : existingTodo.isDone,
+            attachments: attachmentPaths,
+            isDone: req.body.isDone != undefined ? req.body.isDone : existingTodo.isDone,
         },
     });
     res.json({
@@ -214,6 +238,7 @@ router.post("/:id", async (req, res) => {
     });
 });
 
+//! PUT Operations //
 //Create new todo
 router.put("/", async (req, res) => {
     if (
@@ -252,6 +277,21 @@ router.put("/", async (req, res) => {
             });
     }
 
+    const title = req.body.title;
+    const content = req.body.content;
+    //[1] provided as a string intentionally to trigger "Invalid data types" message
+    const tags = req.body.tags ? tryJsonParse(req.body.tags) ? JSON.parse(req.body.tags) : [1] : null;
+    if (
+        (title && typeof title !== "string") ||
+        (content && typeof content !== "string") ||
+        (tags && (!Array.isArray(tags) || Array.isArray(tags) && tags.some((tag: string) => typeof tag !== "string"))) ||
+        (req.body.isDone && req.body.isDone !== "true" && req.body.isDone !== "false")
+    ) {
+        return res
+            .status(400)
+            .json({ status: false, message: "Invalid data types", data: null });
+    }
+
     const newTodoId = v4();
     const extension = mime.extension(thumbnail.mimetype);
     const path = `users/${req.body.userId}/todos/${newTodoId}/thumbnail.${extension}`;
@@ -263,6 +303,7 @@ router.put("/", async (req, res) => {
             title: req.body.title,
             content: req.body.content,
             userId: req.body.userId,
+            tags: req.body.tags ? JSON.parse(req.body.tags) : [],
             thumbnail: path,
         },
     });
@@ -275,47 +316,6 @@ router.put("/", async (req, res) => {
         },
     });
 });
-
-
-
-//Delete todo
-router.delete("/:id", async (req, res) => {
-    if (!req.body.userId || !req.params.id) {
-        return res
-            .status(400)
-            .json({
-                status: false,
-                message: "UserId and TodoId is required",
-                data: null,
-            });
-    }
-
-    const existingTodo = await prisma.todoEntry.findFirst({
-        where: {
-            id: req.params.id,
-            userId: req.body.userId,
-        },
-    });
-
-    if (!existingTodo) {
-        return res
-            .status(404)
-            .json({ status: false, message: "Todo not found", data: null });
-    }
-
-    await prisma.todoEntry.delete({
-        where: {
-            id: req.params.id,
-        },
-    });
-    await deleteDirectory(`users/${req.body.userId}/todos/${req.params.id}`);
-    res.json({
-        status: true,
-        message: "Todo deleted successfully",
-        data: null,
-    });
-});
-
 //Add attachment to todo
 router.put("/:id/attachment", async (req, res) => {
     if (!req.body.userId || !req.params.id || !req.files?.["attachment"]) {
@@ -376,7 +376,44 @@ router.put("/:id/attachment", async (req, res) => {
 });
 
 
+//! DELETE Operations //
+//Delete todo
+router.delete("/:id", async (req, res) => {
+    if (!req.body.userId || !req.params.id) {
+        return res
+            .status(400)
+            .json({
+                status: false,
+                message: "UserId and TodoId is required",
+                data: null,
+            });
+    }
 
+    const existingTodo = await prisma.todoEntry.findFirst({
+        where: {
+            id: req.params.id,
+            userId: req.body.userId,
+        },
+    });
+
+    if (!existingTodo) {
+        return res
+            .status(404)
+            .json({ status: false, message: "Todo not found", data: null });
+    }
+
+    await prisma.todoEntry.delete({
+        where: {
+            id: req.params.id,
+        },
+    });
+    await deleteDirectory(`users/${req.body.userId}/todos/${req.params.id}`);
+    res.json({
+        status: true,
+        message: "Todo deleted successfully",
+        data: null,
+    });
+});
 //Delete todo attachment
 router.delete("/:id/attachment/:attachment", async (req, res) => {
     if (!req.body.userId || !req.params.id || !req.params.attachment) {

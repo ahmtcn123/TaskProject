@@ -34,11 +34,7 @@ export function deleteFile(filePath: string): Promise<void> {
     return new Promise((resolve, reject) => {
         const fullPath = path.join(baseUploadPath, filePath);
         fs.unlink(fullPath, (err) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve();
-            }
+            resolve();
         });
     });
 }
@@ -46,12 +42,8 @@ export function deleteFile(filePath: string): Promise<void> {
 export function deleteDirectory(filePath: string): Promise<void> {
     return new Promise((resolve, reject) => {
         const fullPath = path.join(baseUploadPath, filePath);
-        fs.rmdir(fullPath, { recursive: true }, (err) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve();
-            }
+        fs.rm(fullPath, { recursive: true }, (err) => {
+            resolve();
         });
     });
 }
